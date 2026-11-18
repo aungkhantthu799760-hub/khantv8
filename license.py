@@ -1,5 +1,5 @@
 # =====================================================================
-# license.py - License Management Module (V6 Exclusive & One-Time Use)
+# license.py - License Management Module (KAVIN V9 & Khant Key Optimized)
 # =====================================================================
 
 import os
@@ -11,10 +11,10 @@ import uuid
 from datetime import datetime, timedelta
 
 LICENSE_FILE = "license.dat"
-USED_KEYS_FILE = "used_keys.txt" # သုံးပြီးသား Key တွေ သိမ်းမယ့်ဖိုင်
-DEVICE_FILE = ".device_id"       # ဖုန်းရဲ့ Device ID သိမ်းမယ့်ဖိုင်
+USED_KEYS_FILE = "used_keys.txt"      # သုံးပြီးသား Key တွေ သိမ်းမယ့်ဖိုင်
+DEVICE_FILE = ".device_id"          # ဖုန်းရဲ့ Device ID သိမ်းမယ့်ဖိုင်
 
-SECRET_KEY = b"KavinV6SecretKey2024!@#$%^&*()"
+SECRET_KEY = b"KavinV9SecretKey2026!@#$%^&*()"
 
 def _get_device_id():
     if os.path.exists(DEVICE_FILE):
@@ -96,21 +96,31 @@ def check_approval():
 def activate(key: str):
     try:
         key = key.strip()
-        if not key.startswith("V6-KAVIN-"): return False, "Invalid Key Format (V6 Required)"
         
+        # 1. Key ထဲတွင် 'khant' ပါဝင်ရမည့် စည်းကမ်းချက်
+        if "khant" not in key.lower():
+            return False, "❌ Invalid Key: 'khant' အပါအဝင်ဖြစ်ရပါမည်။"
+        
+        # 2. Key ပုံစံ မှန်ကန်မှု စစ်ဆေးခြင်း (ဥပမာ - KHANT-V9-365-XXXX)
+        if not key.upper().startswith("KHANT-"):
+            return False, "❌ Invalid Key Format ('KHANT-' ဖြင့်စတင်ရပါမည်။)"
+        
+        # 3. တစ်ခါသုံး (One-Time Use) ဖြစ်ပြီးသားလား စစ်ဆေးခြင်း
         if _is_key_used(key):
-            return False, "This key has already been used."
+            return False, "❌ ဤ Key မှာ အခြားဖုန်းတွင် အသုံးပြုပြီးသား ဖြစ်ပါသည်။ (One-Time Use Only)"
 
         parts = key.split("-")
-        if len(parts) < 4: return False, "Invalid Key Structure"
+        if len(parts) < 4: return False, "❌ Invalid Key Structure"
         
         try: days_float = float(parts[2]) 
         except: days_float = 365.0
 
+        # 4. လက်ရှိဖုန်း၏ Device ID နှင့် တွဲ၍ License ဖိုင်ထုတ်ပေးခြင်း
         device_id = _get_device_id()
         encoded = _generate_license_data(key, days_float, device_id)
-        if not encoded: return False, "Failed to generate license"
+        if not encoded: return False, "❌ Failed to generate license"
 
+        # 5. ဖိုင်ထဲသို့ သိမ်းပြီး ဤ Key ကို သုံးပြီးသားအဖြစ် မှတ်တမ်းတင်ခြင်း
         with open(LICENSE_FILE, "w") as f: f.write(encoded)
         _mark_key_used(key)
 
